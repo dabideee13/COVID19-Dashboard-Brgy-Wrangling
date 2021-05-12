@@ -85,8 +85,8 @@ def main():
     df_ = barangay.sort_index().reset_index()
 
     # Separate 'Date' and 'Barangay'
-    date = list(set(df_.Date))
-    bar = list(set(df_.Barangay))
+    date = sorted(list(set(df_.Date)))
+    bar = sorted(list(set(df_.Barangay)))
 
     df_blank = pd.DataFrame(columns=date, index=bar).fillna(0)
 

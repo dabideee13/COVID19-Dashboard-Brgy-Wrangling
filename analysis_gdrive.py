@@ -14,14 +14,16 @@ def main():
     path = lambda filename: os.path.join(DIR, filename)
 
     # Define filenames of data
-    data = 'gdrive-data.csv'
+    data = 'gdrive-data2.csv'
 
     # Import gdrive data
     df = pd.read_csv(path(data))
-    df2 = pd.read_csv('gdrive-data2.csv')
+    df = df.rename(columns={'Unnamed: 0': 'Barangay'})
+    df.index = df.Barangay
+    df = df.drop('Barangay', axis=1)
 
-    df2 = df2.rename(columns={'Unnamed: 0': 'Barangay'})
-    print(df2[df2.Barangay == 'Tubod'].sum(axis=1))
+    print(df)
+
 
 
 if __name__ == '__main__':
