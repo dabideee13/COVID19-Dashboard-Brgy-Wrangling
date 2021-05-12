@@ -91,8 +91,9 @@ def main():
     df1 = df1.drop('Barangay', axis=1)
     #print(df1.loc['Abuno'], df1.columns[0])
     
+    '''
     # Scan through each barangay in gdrive data
-    for i, bar in enumerate(df1.index):
+    for bar in df1.index:
 
         # Cross-check with dashboard data
         if bar in list(set(barangay)):
@@ -101,16 +102,23 @@ def main():
             for col in df1.columns:
 
                 # Cross-check with dashboard data
+                # TODO:
                 if col in barangay.index.to_list():
 
                     # Add '1' in that cell
                     df1.loc[bar, col] = 1
 
     df1.to_csv('gdrive-data.csv')
+    '''
 
+    for bar in df1.index:
+        if bar in list(set(barangay)):
+            for col in df1.columns:
+                if col in list(barangay[barangay == bar].index):
+                    df1.loc[bar, col] = 1
 
-        #print(f'{i}: ', df1.loc[bar, df1.columns[0]])
+    df1.to_csv('gdrive-data.csv')
 
-
+            
 if __name__ == '__main__':
     main()

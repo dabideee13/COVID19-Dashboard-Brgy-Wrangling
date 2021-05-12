@@ -4,6 +4,7 @@
 
 import os
 import pandas as pd
+pd.set_option('display.max_columns', 10)
 
 
 def main():
@@ -18,8 +19,13 @@ def main():
     # Import gdrive data
     df = pd.read_csv(path(data))
 
+    # Create new dataframe for totals
+    df_new = pd.DataFrame()
+
+    #print(df_new)
+    
     # Show dataframe
-    print(df)
+    print(df[df['Barangay'] == 'Abuno'].to_list())
 
 
 if __name__ == '__main__':
