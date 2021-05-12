@@ -1,0 +1,4 @@
+gab
+*.pyc
+.DS_Store
+.env
