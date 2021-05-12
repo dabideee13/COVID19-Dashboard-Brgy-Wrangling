@@ -18,14 +18,10 @@ def main():
 
     # Import gdrive data
     df = pd.read_csv(path(data))
+    df2 = pd.read_csv('gdrive-data2.csv')
 
-    # Create new dataframe for totals
-    df_new = pd.DataFrame()
-
-    #print(df_new)
-    
-    # Show dataframe
-    print(df[df['Barangay'] == 'Abuno'].to_list())
+    df2 = df2.rename(columns={'Unnamed: 0': 'Barangay'})
+    print(df2[df2.Barangay == 'Tubod'].sum(axis=1))
 
 
 if __name__ == '__main__':

@@ -82,6 +82,15 @@ def main():
         }
     )
 
+    df_ = barangay.sort_index().reset_index()
+
+    # Separate 'Date' and 'Barangay'
+    date = list(set(df_.Date))
+    bar = list(set(df_.Barangay))
+
+    df_blank = pd.DataFrame(columns=date, index=bar).fillna(0)
+
+    '''
     b1 = list(set(list(df1_brgy)))
     b2 = list(set(barangay.to_list()))
 
@@ -89,28 +98,7 @@ def main():
 
     df1.index = df1.Barangay
     df1 = df1.drop('Barangay', axis=1)
-    #print(df1.loc['Abuno'], df1.columns[0])
     
-    '''
-    # Scan through each barangay in gdrive data
-    for bar in df1.index:
-
-        # Cross-check with dashboard data
-        if bar in list(set(barangay)):
-            
-            # Go through each date or column
-            for col in df1.columns:
-
-                # Cross-check with dashboard data
-                # TODO:
-                if col in barangay.index.to_list():
-
-                    # Add '1' in that cell
-                    df1.loc[bar, col] = 1
-
-    df1.to_csv('gdrive-data.csv')
-    '''
-
     for bar in df1.index:
         if bar in list(set(barangay)):
             for col in df1.columns:
@@ -118,7 +106,39 @@ def main():
                     df1.loc[bar, col] = 1
 
     df1.to_csv('gdrive-data.csv')
+    '''
 
+    # Loop through each barangay (index)
+    for bar in df_blank.index:
+
+        # Loop through each date (column)
+        for col in df_blank.columns:
+
+            # Use dates from dashboard data
+            dates = list(barangay[barangay == bar].index)
+
+            # If current column (a date) can be found in dashboard data,
+            # loop through it and look for occurences.
+            if col in dates:
+
+                # Create list to store dates
+                counts = list()
+
+                for date in dates:
+                    if date == col:
+
+                        # If dates has the same value in dashboard data,
+                        # store in list to get counts
+                        counts.append(date)
+
+                        # Let the value of this cell be equal to the
+                        # number of its occurences
+                        df_blank.loc[bar, col] = len(counts)
+    
+    #print(df_blank)
+    # Export to csv 
+    df_blank.to_csv('gdrive-data2.csv')
             
+
 if __name__ == '__main__':
     main()
