@@ -90,24 +90,25 @@ def main():
 
     df_blank = pd.DataFrame(columns=date, index=bar).fillna(0)
 
-    '''
-    b1 = list(set(list(df1_brgy)))
-    b2 = list(set(barangay.to_list()))
-
     df1 = pd.concat([df1_brgy, df1_], axis=1)
 
     df1.index = df1.Barangay
     df1 = df1.drop('Barangay', axis=1)
     
+    # Mapping for gdrive-data.csv
     for bar in df1.index:
         if bar in list(set(barangay)):
             for col in df1.columns:
-                if col in list(barangay[barangay == bar].index):
-                    df1.loc[bar, col] = 1
-
+                dates = list(barangay[barangay == bar].index)
+                if col in dates:
+                    counts = list()
+                    for date in dates:
+                        if date == col:
+                            counts.append(date)
+                            df1.loc[bar, col] = len(counts)
     df1.to_csv('gdrive-data.csv')
-    '''
 
+    # Mapping for gdrive-data2.csv
     # Loop through each barangay (index)
     for bar in df_blank.index:
 
