@@ -2,3 +2,4 @@ gab
 *.pyc
 .DS_Store
 .env
+/data
