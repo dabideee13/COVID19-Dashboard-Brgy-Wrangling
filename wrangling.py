@@ -97,7 +97,7 @@ def main():
     
     # Mapping for gdrive-data.csv
     for bar in df1.index:
-        if bar in list(set(barangay)):
+        if bar in set(barangay):
             for col in df1.columns:
                 dates = list(barangay[barangay == bar].index)
                 if col in dates:
