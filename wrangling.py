@@ -1,11 +1,9 @@
-#!/Users/d.e.magno/Projects/mini/GabrielEngcong/gab/bin/python
 # -*- coding: utf-8 -*-
 
 import os
 import datetime as dt
 from dfply import *
 import pandas as pd
-#pd.set_option('display.max_columns', None)
 
 
 @dfpipe
