@@ -5,6 +5,8 @@ from pathlib import Path
 from dfply import *
 import pandas as pd
 
+from logger import stream_logger
+
 
 @dfpipe
 def new_index(df_: pd.DataFrame) -> pd.DataFrame:
@@ -17,10 +19,20 @@ def new_index(df_: pd.DataFrame) -> pd.DataFrame:
 def main():
 
     # Set path to data
-    data_path = Path('data/raw')
-    data_file = list(Path.joinpath(Path.cwd(), data_path).glob('./*'))[0]
+    in_path = Path('data/raw')
+    out_path = Path('data/processed')
+    filename = (
+        list(
+            Path.joinpath(
+                Path.cwd(),
+                in_path
+            )
+            .glob('./*.csv')
+        )[0]
+    )
 
-    df = pd.read_csv(data_file)
+    df = pd.read_csv(filename)
+    stream_logger.info('DONE: Importing DataFrame')
 
     to_drop = [
         'Contact Number',
@@ -67,6 +79,10 @@ def main():
     # Drop, reorder, and change column names
     df = df.drop(to_drop, axis=1)[new_order]
     df.columns = new_columns
+    stream_logger.info(
+        'DONE: Dropping unnecessary columns'
+        'and changing column names.'
+    )
 
     df = (
         df >>
@@ -74,6 +90,7 @@ def main():
         drop(X.DateIdentified) >>
         new_index
     )
+    stream_logger.info('DONE: Wrangling `DateIdentified`')
 
     # Subset only `Barangay`
     barangay = df >> select(X.Barangay)
@@ -101,12 +118,14 @@ def main():
     )
 
     df = barangay.sort_index().reset_index()
+    stream_logger.info('DONE: Wrangling barangay')
 
     # Separate `Date` and `Barangay`
     date = sorted(list(set(df.Date)))
-    bar = sorted(list(set(df.Barangay)))
+    bar = sorted(list(set(df.Barangay.apply(str))))
 
     df = pd.DataFrame(columns=date, index=bar).fillna(0)
+    stream_logger.info('DONE: Filling missing values with 0')
 
     for bar in df.index:
         for col in df.columns:
@@ -121,13 +140,16 @@ def main():
                         counts.append(date)
 
                         df.loc[bar, col] = len(counts)
+    stream_logger.info('DONE: Main loop')
 
-    df_blank.to_csv(
+    df.to_csv(
         Path.joinpath(
             Path.cwd(),
-            data_file.stem + '_processed' + data_file.suffix
+            out_path,
+            filename.stem + '_processed' + filename.suffix
         )
     )
+    stream_logger.info('DONE: Exporting file')
 
 
 if __name__ == '__main__':
