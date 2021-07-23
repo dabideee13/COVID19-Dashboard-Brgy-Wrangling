@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
+import os
 
 from dfply import *
 import pandas as pd
@@ -41,11 +42,6 @@ def main():
         'City',
         'Remarks',
         'Province',
-        'Reinfected',
-        'Added By',
-        'Date Added',
-        'Updated By',
-        'Date Updated'
     ]
 
     new_order = [
@@ -153,4 +149,13 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+
+    if 'dist' not in os.getcwd():
+        main()
+
+    else:
+        # moves one folder back until the current_folder is COVID19-Dashboard-Brgy-Wrangling
+        while 'dist' in str(os.getcwd()):
+            os.chdir('..')
+
+        main()
