@@ -2,4 +2,4 @@
 Wrangle barangay counts from COVID-19 dashboard data 
 
 to run:
-`dist/exe//Data Wrangler.exe`
+`dist/exe/Data Wrangler.exe`
