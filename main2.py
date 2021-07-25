@@ -20,10 +20,6 @@ class Wrangler(QtWidgets.QMainWindow):
 
     def main(self):
 
-        # change directory to the main folder
-        while 'dist' in os.getcwd():
-            os.chdir('..')
-
         self.in_path = Path('data/raw')
         self.out_path = Path('data/processed')
         self.filename = (list(Path.joinpath(Path.cwd(),self.in_path).glob('./*.csv'))[0])
