@@ -2,20 +2,46 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.uic import loadUi
+import re
 
 from pathlib import Path
-import os
 
 from dfply import *
 import pandas as pd
 
 
+class Input(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Input, self).__init__()
+        loadUi('ui/input.ui', self)
+        self.configureWidgets()
+
+    def configureWidgets(self):
+        self.pushButton.clicked.connect(self.buttonclicked)
+
+    def buttonclicked(self):
+        self.path_pattern = r'[a-zA-Z]:\\((?:.*?\\)*).*'
+
+        self.path = self.lineEdit.text()
+        self.match = re.findall(self.path_pattern, self.path)
+        if self.match:
+            self.wrangle()
+
+    def wrangle(self):
+        self.path = self.path.replace('\\', '/')
+        print(self.path)
+        self.new_win = Wrangler(path = self.path)
+        self.new_win.show()
+        self.close()
+
+
+
 
 class Wrangler(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, path=None):
         super(Wrangler,self).__init__()
-
         loadUi('ui/mainwin.ui', self)
+        self.p = self.path
         self.main()
 
     def main(self):
@@ -148,7 +174,7 @@ class Wrangler(QtWidgets.QMainWindow):
 
 
 app = QApplication(sys.argv)
-win = Wrangler()
+win = Input()
 win.show()
 sys.exit(app.exec_())
 
