@@ -4,7 +4,6 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QFileDialog, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
 from pathlib import Path
-from dfply import *
 import pandas as pd
 
 
@@ -87,15 +86,14 @@ class Wrangler(QtWidgets.QMainWindow):
 
         QListWidgetItem('DONE: Dropping unnecessary columns and changing column names.', self.listWidget)
 
-        self.df = (
-                self.df >> mutate(Date=X.DateIdentified.apply(pd.to_datetime)) >>
-                drop(X.DateIdentified) >> self.new_index()
-        )
+        self.df = self.df.rename(columns={'DateIdentified': 'Date'})
+        self.df['Date'] = self.df.Date.apply(pd.to_datetime)
+        self.df = self.df.set_index('Date')
 
         QListWidgetItem('DONE: Wrangling `Date Identified`', self.listWidget)
 
         # subset only `Barangay`
-        self.barangay = self.df >> select(X.Barangay)
+        self.barangay = pd.DataFrame(self.df.Barangay)
 
         self.barangay = self.barangay.Barangay.replace(
             {
@@ -153,16 +151,6 @@ class Wrangler(QtWidgets.QMainWindow):
             )
         )
         QListWidgetItem('DONE: Exporting file', self.listWidget)
-
-
-    @dfpipe
-    def new_index(df_: pd.DataFrame) -> pd.DataFrame:
-
-        df = df_.copy(deep=True)
-        df.index = df.Date
-
-        df.drop('Date', axis=1, inplace=True)
-        return df
 
 
 def main():
