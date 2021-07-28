@@ -1,29 +1,46 @@
 import sys
+
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QFileDialog, QListWidgetItem
+from PyQt5.QtWidgets import QApplication, QFileDialog, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
 from pathlib import Path
 from dfply import *
 import pandas as pd
 
+
 class Wrangler(QtWidgets.QMainWindow):
+
     def __init__(self):
         super(Wrangler, self).__init__()
         loadUi("ui/mainwin.ui", self)
+
+        width  = self.frameGeometry().width()
+        height = self.frameGeometry().height()
+
+        self.setFixedSize(width, height)
         self.configureWidgets()
 
     def configureWidgets(self):
-        self.openfileButton.clicked.connect(self.openfileClicked)
+        self.browsefileButton.clicked.connect(self.browsefileClicked)
         self.wrangleButton.clicked.connect(self.wrangleClicked)
 
-    def openfileClicked(self):
+    def browsefileClicked(self):
+        self.wrangleButton.setText('Wrangle')
+        self.listWidget.clear()
+
         self.file_name = QFileDialog.getOpenFileName(self, "Open File", "", "CSV(*.csv)")
         if self.file_name:
             self.filename = self.file_name[0]
+            self.lineEdit.setText(self.filename)
 
     def wrangleClicked(self):
-        self.out_path = Path('data/processed')
-        self.df       = pd.read_csv(self.filename)
+
+        self.out_path = Path(self.filename).parent
+        try:
+            self.df = pd.read_csv(self.filename)
+        except:
+            QMessageBox.information(self, "Wrangle.", "Please use a valid file path.")
+            return
 
         QListWidgetItem('DONE: Importing DataFrame', self.listWidget)
 
@@ -65,7 +82,7 @@ class Wrangler(QtWidgets.QMainWindow):
         ]
 
         # Drop, reorder, and change column names
-        self.df         = self.df.drop(self.to_drop, axis=1)[self.new_order]
+        self.df = self.df.drop(self.to_drop, axis=1)[self.new_order]
         self.df.columns = self.new_columns
 
         QListWidgetItem('DONE: Dropping unnecessary columns and changing column names.', self.listWidget)
@@ -140,15 +157,21 @@ class Wrangler(QtWidgets.QMainWindow):
 
     @dfpipe
     def new_index(df_: pd.DataFrame) -> pd.DataFrame:
+
         df = df_.copy(deep=True)
         df.index = df.Date
+
         df.drop('Date', axis=1, inplace=True)
         return df
 
 
+def main():
+
+    app = QApplication(sys.argv)
+    window = Wrangler()
+    window.show()
+    sys.exit(app.exec_())
 
 
-app = QApplication(sys.argv)
-window = Wrangler()
-window.show()
-sys.exit(app.exec_())
+if __name__ == '__main__':
+    main()
