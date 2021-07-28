@@ -1,59 +1,49 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QFileDialog, QListWidgetItem, QMessageBox
 from PyQt5.uic import loadUi
-import re
-
 from pathlib import Path
-
 from dfply import *
 import pandas as pd
 
-
-class Input(QtWidgets.QMainWindow):
+class Wrangler(QtWidgets.QMainWindow):
     def __init__(self):
-        super(Input, self).__init__()
-        loadUi('ui/input.ui', self)
+        super(Wrangler, self).__init__()
+        loadUi("ui/mainwin.ui", self)
+
+        width  = self.frameGeometry().width()
+        height = self.frameGeometry().height()
+
+        self.setFixedSize(width, height)
         self.configureWidgets()
 
     def configureWidgets(self):
-        self.pushButton.clicked.connect(self.buttonclicked)
-
-    def buttonclicked(self):
-        self.path_pattern = r'[a-zA-Z]:\\((?:.*?\\)*).*'
-
-        self.path = self.lineEdit.text()
-        self.match = re.findall(self.path_pattern, self.path)
-        if self.match:
-            self.wrangle()
-
-    def wrangle(self):
-        self.path = self.path.replace('\\', '/')
-        print(self.path)
-        self.new_win = Wrangler(path = self.path)
-        self.new_win.show()
-        self.close()
+        self.browsefileButton.clicked.connect(self.browsefileClicked)
+        self.wrangleButton.clicked.connect(self.wrangleClicked)
 
 
+    def browsefileClicked(self):
+        self.wrangleButton.setText('Wrangle')
+        self.listWidget.clear()
+
+        self.file_name = QFileDialog.getOpenFileName(self, "Open File", "", "CSV(*.csv)")
+        if self.file_name:
+            self.filename = self.file_name[0]
+            self.lineEdit.setText(self.filename)
 
 
-class Wrangler(QtWidgets.QMainWindow):
-    def __init__(self, path=None):
-        super(Wrangler,self).__init__()
-        loadUi('ui/mainwin.ui', self)
-        self.p = self.path
-        self.main()
+    def wrangleClicked(self):
 
-    def main(self):
-
-        self.in_path = Path('data/raw')
         self.out_path = Path('data/processed')
-        self.filename = (list(Path.joinpath(Path.cwd(),self.in_path).glob('./*.csv'))[0])
+        try:
+            self.df = pd.read_csv(self.filename)
+        except:
+            QMessageBox.information(self, "Wrangle.", "Please use a valid file path.")
+            return
 
-        self.df = pd.read_csv(self.filename)
-        self.listWidget.addItem('DONE: Importing DataFrame')
+        QListWidgetItem('DONE: Importing DataFrame', self.listWidget)
 
-        self.to_drop = [
+        self.to_drop  = [
             'Contact Number',
             'Zone/Purok',
             'Street',
@@ -91,16 +81,17 @@ class Wrangler(QtWidgets.QMainWindow):
         ]
 
         # Drop, reorder, and change column names
-        self.df = self.df.drop(self.to_drop, axis=1)[self.new_order]
+        self.df         = self.df.drop(self.to_drop, axis=1)[self.new_order]
         self.df.columns = self.new_columns
-        self.listWidget.addItem('DONE: Dropping unnecessary columns and changing column names.')
+
+        QListWidgetItem('DONE: Dropping unnecessary columns and changing column names.', self.listWidget)
 
         self.df = (
-                   self.df >> mutate(Date = X.DateIdentified.apply(pd.to_datetime)) >>
-                   drop(X.DateIdentified) >> self.new_index()
+                self.df >> mutate(Date=X.DateIdentified.apply(pd.to_datetime)) >>
+                drop(X.DateIdentified) >> self.new_index()
         )
 
-        self.listWidget.addItem('DONE: Wrangling `Date Identified`')
+        QListWidgetItem('DONE: Wrangling `Date Identified`', self.listWidget)
 
         # subset only `Barangay`
         self.barangay = self.df >> select(X.Barangay)
@@ -128,14 +119,14 @@ class Wrangler(QtWidgets.QMainWindow):
         )
 
         self.df = self.barangay.sort_index().reset_index()
-        self.listWidget.addItem('DONE: Wrangling barangay')
+        QListWidgetItem('DONE: Wrangling barangay', self.listWidget)
 
         # separate `Date` and `Barangay`
         self.date = sorted(list(set(self.df.Date)))
         self.bar = sorted(list(set(self.df.Barangay.apply(str))))
 
         self.df = pd.DataFrame(columns=self.date, index=self.bar).fillna(0)
-        self.listWidget.addItem('DONE: Filling missing values with 0')
+        QListWidgetItem('DONE: Filling missing values with 0', self.listWidget)
 
         for bar in self.df.index:
             for col in self.df.columns:
@@ -151,46 +142,32 @@ class Wrangler(QtWidgets.QMainWindow):
 
                             self.df.loc[bar, col] = len(counts)
 
-        self.listWidget.addItem('DONE: Main loop')
+        QListWidgetItem('DONE: Main loop', self.listWidget)
 
         self.df.to_csv(
             Path.joinpath(
                 Path.cwd(),
                 self.out_path,
-                self.filename.stem + '_processed' + self.filename.suffix
+                Path(self.filename).stem + '_processed' + Path(self.filename).suffix
             )
         )
-
-        self.listWidget.addItem('DONE: Exporting file')
+        QListWidgetItem('DONE: Exporting file', self.listWidget)
 
 
 
     @dfpipe
     def new_index(df_: pd.DataFrame) -> pd.DataFrame:
-        df = df_.copy(deep=True)
+
+        df       = df_.copy(deep=True)
         df.index = df.Date
+
         df.drop('Date', axis=1, inplace=True)
         return df
 
 
+
+
 app = QApplication(sys.argv)
-win = Input()
-win.show()
+window = Wrangler()
+window.show()
 sys.exit(app.exec_())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
