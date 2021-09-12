@@ -6,6 +6,8 @@ An executable designed to wrangle data from this [dashboard](https://msuiit.edu.
 - [Usage](#Usage)
 
 ## Installation
+Note: Currently compatible for windows only 
+
 ### Windows
 
 Clone this repository:
