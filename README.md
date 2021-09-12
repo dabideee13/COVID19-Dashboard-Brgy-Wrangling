@@ -1,3 +1,3 @@
-# IIT COVID-19 Dashboard Barangay Counts Wrangling
-Wrangle barangay counts from COVID-19 dashboard data 
+# COVID19 TimeSeries Data Wrangling
 
+## An executable designed to wrangle data from (https://msuiit.edu.ph/covid19/).
