@@ -8,4 +8,16 @@ An executable designed to wrangle data from this [dashboard](https://msuiit.edu.
 ## Installation
 ### Windows
 
+Clone this repository
+```
+$ git clone https://github.com/dabideee13/c19-timeseries-wrangling.git
+```
+
+Run executable (by clicking):
+```
+COVID19-Dashboard-Brgy-Wrangling.exe
+```
+
+Find the installed app within the same directory and run it (by clicking).
+
 ## Usage
